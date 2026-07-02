@@ -183,7 +183,6 @@
 
   /* ---------- 용어 도움말 ---------- */
   .term{border-bottom:2px dotted var(--pink); cursor:pointer; color:var(--pink-deep);}
-  .term::after{content:"❔"; font-size:.75em; margin-left:2px;}
   #tipbox{
     position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
     max-width:520px; width:calc(100% - 32px); background:#5b4650; color:#fff;
@@ -780,7 +779,19 @@ function renderReport(){
   app.querySelectorAll('.sec-h').forEach(h=>{
     h.onclick=()=>document.getElementById('sec-'+h.dataset.sec).classList.toggle('open');
   });
-  document.getElementById('print').onclick=()=>window.print();
+  document.getElementById('print').onclick=()=>{
+    // PDF에 모든 칸이 담기도록 전부 펼치기
+    document.querySelectorAll('.sec').forEach(s=>s.classList.add('open'));
+    // 아이폰 '홈 화면 앱'은 인쇄가 막혀 있어 저장 방법을 안내
+    if(window.navigator.standalone===true){
+      alert("아이폰 홈 화면 앱에서는 바로 인쇄가 어려워요.\n\n① 사파리(Safari)로 이 주소를 여세요\n② 아래 공유 버튼(􀈂) → '프린트'\n③ 미리보기 화면을 두 손가락으로 벌리면\n   'PDF로 저장'이 됩니다.");
+      return;
+    }
+    setTimeout(()=>{
+      try{ window.print(); }
+      catch(e){ alert("인쇄 창을 열지 못했어요.\n브라우저 메뉴에서 '인쇄'를 눌러 'PDF로 저장'을 선택해 주세요."); }
+    }, 200);
+  };
   document.getElementById('restart').onclick=()=>{
     step=-1; answers.strengths=[];
     Object.keys(answers).forEach(k=>{ if(k!=='strengths') delete answers[k]; });

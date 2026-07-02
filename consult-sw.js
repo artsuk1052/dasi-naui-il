@@ -1,6 +1,6 @@
 /* 다시, 나의 일 — 재취업 컨설팅 앱 서비스 워커 (배포판)
    오프라인에서도 실행되도록 앱 파일을 캐시합니다. */
-const CACHE = 'consult-v3';
+const CACHE = 'consult-v4';
 const ASSETS = [
   './',
   'index.html',
