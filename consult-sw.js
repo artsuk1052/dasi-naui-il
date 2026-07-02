@@ -1,13 +1,14 @@
 /* 다시, 나의 일 — 재취업 컨설팅 앱 서비스 워커 (배포판)
    오프라인에서도 실행되도록 앱 파일을 캐시합니다. */
-const CACHE = 'consult-v1';
+const CACHE = 'consult-v2';
 const ASSETS = [
   './',
   'index.html',
   'consult-manifest.json',
   'consult-icon-192.png',
   'consult-icon-512.png',
-  'consult-apple-touch.png'
+  'consult-apple-touch.png',
+  'og-image.png'
 ];
 
 self.addEventListener('install', (e) => {
