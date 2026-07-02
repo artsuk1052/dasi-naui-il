@@ -1,6 +1,6 @@
 /* 다시, 나의 일 — 재취업 컨설팅 앱 서비스 워커 (배포판)
    오프라인에서도 실행되도록 앱 파일을 캐시합니다. */
-const CACHE = 'consult-v2';
+const CACHE = 'consult-v3';
 const ASSETS = [
   './',
   'index.html',
@@ -33,7 +33,10 @@ self.addEventListener('fetch', (e) => {
       return fetch(e.request).then((res) => {
         try {
           const url = new URL(e.request.url);
-          if (url.origin === self.location.origin && res.ok) {
+          const h = url.hostname;
+          const cacheable = url.origin === self.location.origin
+            || h === 'fonts.googleapis.com' || h === 'fonts.gstatic.com';
+          if (cacheable && res.ok) {
             const copy = res.clone();
             caches.open(CACHE).then((c) => c.put(e.request, copy));
           }
