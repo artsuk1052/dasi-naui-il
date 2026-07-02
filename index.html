@@ -513,8 +513,22 @@ function renderStart(){
 
 /* ---------- 앱 설치 (홈 화면에 추가) ---------- */
 let deferredPrompt=null;
+const _ua = navigator.userAgent || '';
 const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
-const isiOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isiOS = /iphone|ipad|ipod/i.test(_ua);
+const isAndroid = /android/i.test(_ua);
+// 카카오톡·라인·페북·네이버 등 '인앱 브라우저' (설치·인쇄가 막혀 있음)
+const isInApp = /KAKAOTALK|Line\/|FBAN|FBAV|FB_IAB|Instagram|DaumApps|NAVER|; wv\)/i.test(_ua);
+
+function copyAppUrl(btn){
+  const url = location.href.split('#')[0];
+  const done = ()=>{ if(btn){ btn.textContent='주소가 복사됐어요 ✓'; } };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(done).catch(()=>prompt('아래 주소를 길게 눌러 복사하세요', url));
+  } else {
+    prompt('아래 주소를 길게 눌러 복사하세요', url);
+  }
+}
 
 window.addEventListener('beforeinstallprompt',(e)=>{
   e.preventDefault();
@@ -540,6 +554,20 @@ function renderInstall(){
       try{ await deferredPrompt.userChoice; }catch(_){}
       deferredPrompt=null; renderInstall();
     };
+  } else if(isInApp){
+    // 카카오톡 등 인앱 브라우저: 설치가 막혀 있어 외부 브라우저로 안내
+    slot.innerHTML=`
+      <div class="install-box">
+        ⚠️ <b>지금은 카톡·앱 안의 화면이라 설치가 안 돼요.</b><br>
+        <span style="color:var(--ink-soft);font-size:.95em">진짜 브라우저(크롬)로 열어야 설치·PDF 저장이 됩니다.</span>
+        <ol>
+          <li>오른쪽 위 <b>⋮</b> 또는 <b>공유</b> 버튼을 누르세요.</li>
+          <li><b>‘다른 브라우저로 열기’</b> · <b>‘Chrome으로 열기’</b>를 선택하세요.</li>
+          <li>크롬에서 열리면 이 자리에 <b>설치 버튼</b>이 나타나요.</li>
+        </ol>
+        <button class="btn install" id="copy-url">📋 앱 주소 복사하기</button>
+      </div>`;
+    document.getElementById('copy-url').onclick=(e)=>copyAppUrl(e.currentTarget);
   } else if(isiOS){
     // 아이폰 사파리: 수동 안내
     slot.innerHTML=`
@@ -548,15 +576,26 @@ function renderInstall(){
         <ol>
           <li>화면 아래 <span class="share">􀈂 공유</span> 버튼을 누르세요.</li>
           <li>목록에서 <b>‘홈 화면에 추가’</b>를 누르세요.</li>
-          <li><b>‘추가’</b>를 누르면 끝! 나침반 아이콘이 생깁니다. 🧭</li>
+          <li><b>‘추가’</b>를 누르면 끝! 🌅 아이콘이 생깁니다.</li>
         </ol>
       </div>`;
+  } else if(isAndroid){
+    // 안드로이드 크롬인데 설치 버튼이 아직 안 뜬 경우
+    slot.innerHTML=`
+      <div class="install-box">
+        📲 <b>홈 화면에 앱으로 추가하기</b>
+        <ol>
+          <li>크롬 오른쪽 위 <b>⋮</b> 버튼을 누르세요.</li>
+          <li><b>‘앱 설치’</b> 또는 <b>‘홈 화면에 추가’</b>를 누르세요.</li>
+        </ol>
+        <span style="color:var(--ink-soft);font-size:.9em">※ 카톡 등 다른 앱 안에서 열었다면, 먼저 크롬으로 열어주세요.</span>
+      </div>`;
   } else {
-    // 그 외(데스크톱/미지원 브라우저) — 주소창 설치 아이콘 안내
+    // 데스크톱
     slot.innerHTML=`
       <div class="install-box">
         📲 <b>앱으로 설치하기</b><br>
-        <span style="color:var(--ink-soft);font-size:.95em">크롬·엣지 브라우저의 주소창 오른쪽 <b>설치(⊕)</b> 아이콘을 누르면 앱처럼 설치돼요. (안드로이드폰에서는 이 화면에 설치 버튼이 자동으로 나타납니다)</span>
+        <span style="color:var(--ink-soft);font-size:.95em">크롬·엣지 브라우저의 주소창 오른쪽 <b>설치(⊕)</b> 아이콘을 누르면 앱처럼 설치돼요.</span>
       </div>`;
   }
 }
@@ -782,6 +821,11 @@ function renderReport(){
   document.getElementById('print').onclick=()=>{
     // PDF에 모든 칸이 담기도록 전부 펼치기
     document.querySelectorAll('.sec').forEach(s=>s.classList.add('open'));
+    // 카톡·앱 안(인앱 브라우저)은 인쇄가 막혀 있어 크롬으로 열기 안내
+    if(isInApp){
+      alert("카톡·앱 안에서는 PDF 저장(인쇄)이 막혀 있어요.\n\n① 오른쪽 위 ⋮ 또는 공유 버튼\n② '다른 브라우저로 열기'(Chrome) 선택\n③ 크롬에서 다시 이 버튼을 누르면\n   'PDF로 저장'이 됩니다.");
+      return;
+    }
     // 아이폰 '홈 화면 앱'은 인쇄가 막혀 있어 저장 방법을 안내
     if(window.navigator.standalone===true){
       alert("아이폰 홈 화면 앱에서는 바로 인쇄가 어려워요.\n\n① 사파리(Safari)로 이 주소를 여세요\n② 아래 공유 버튼(􀈂) → '프린트'\n③ 미리보기 화면을 두 손가락으로 벌리면\n   'PDF로 저장'이 됩니다.");
