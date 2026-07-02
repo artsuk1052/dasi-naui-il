@@ -1,0 +1,26 @@
+{
+  "name": "다시, 나의 일 — 재취업 컨설팅",
+  "short_name": "다시, 나의 일",
+  "description": "폐업 소상공인을 위한 재취업 진로 컨설팅. 나이·강점·현실에 맞는 직무 TOP 3와 10년 성장 지도를 안내합니다.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f2f8f9",
+  "theme_color": "#1f7a8c",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "consult-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "consult-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
